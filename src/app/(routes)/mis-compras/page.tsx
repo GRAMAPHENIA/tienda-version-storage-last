@@ -1,7 +1,13 @@
 "use client";
 
-import { Navbar } from "@/components/Navbar";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import { useStore } from "@/store/useStore";
+import type { Product } from "@/store/useStore";
+
+import { useToast } from "@/hooks/use-toast";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,23 +16,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Product } from "@/store/useStore";
-import { Trash2, Heart } from "lucide-react";
+
+import { Navbar } from "@/components/Navbar";
+
 import { useState } from "react";
-import Image from "next/image";
-import { useToast } from "@/hooks/use-toast";
+import { Trash2, Heart } from "lucide-react";
 
 export default function ShoppingCartPage() {
-  const { cart, removeFromCart, addToFavorites, isInFavorites } = useStore(); // Verificación de favoritos
+  const { cart, removeFromCart, addToFavorites, isInFavorites } = useStore();
   const [quantities, setQuantities] = useState<{ [key: number]: number }>(() =>
     cart.reduce((acc, product) => ({ ...acc, [product.id]: 1 }), {})
   );
   const { toast } = useToast();
 
   const updateQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity >= 1) {
-      setQuantities((prev) => ({ ...prev, [productId]: newQuantity }));
-    }
+    setQuantities((prev) => {
+      const updatedQuantities = { ...prev };
+      if (newQuantity >= 1) {
+        updatedQuantities[productId] = newQuantity;
+      }
+      return updatedQuantities;
+    });
   };
 
   const handleRemoveFromCart = (productId: number, productName: string) => {
@@ -59,6 +69,12 @@ export default function ShoppingCartPage() {
       (total, product) => total + product.price * (quantities[product.id] || 1),
       0
     );
+  };
+
+  const router = useRouter();
+
+  const handlePayment = () => {
+    router.push("/pagos");
   };
 
   return (
@@ -142,12 +158,12 @@ export default function ShoppingCartPage() {
                           <Button
                             variant="outline"
                             onClick={() => handleAddToFavorites(product)}
-                            disabled={isInFavorites(product.id)} // Deshabilitar si ya está en favoritos
+                            disabled={isInFavorites(product.id)}
                           >
                             <Heart
                               className={`w-5 h-5 mr-2 ${
                                 isInFavorites(product.id) ? "text-black" : ""
-                              }`} // Cambia a negro si está en favoritos
+                              }`}
                             />
                             Guardar en favoritos
                           </Button>
@@ -159,8 +175,21 @@ export default function ShoppingCartPage() {
               </div>
             </div>
 
+            {/* Resumen de compra detallado */}
             <div className="bg-gray-100 p-6 rounded-lg lg:col-span-1">
               <h2 className="text-xl font-bold mb-4">Resumen de la compra</h2>
+              <ul className="mb-4">
+                {cart.map((product) => (
+                  <li key={product.id} className="flex justify-between mb-2">
+                    <span>{product.name} (x{quantities[product.id] || 1})</span>
+                    <span>
+                      ${(
+                        product.price * (quantities[product.id] || 1)
+                      ).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
               <div className="flex justify-between mb-2">
                 <span>Subtotal:</span>
                 <span>${calculateTotal().toFixed(2)}</span>
@@ -173,7 +202,7 @@ export default function ShoppingCartPage() {
                 <span>Total:</span>
                 <span>${calculateTotal().toFixed(2)}</span>
               </div>
-              <Button className="w-full mt-4" size="lg">
+              <Button className="w-full mt-4" size="lg" onClick={handlePayment}>
                 Proceder al pago
               </Button>
             </div>

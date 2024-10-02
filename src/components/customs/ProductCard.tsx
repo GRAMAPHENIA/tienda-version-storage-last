@@ -27,8 +27,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   // Solo verificar el estado en el cliente
   useEffect(() => {
-    setIsProductInCart(isInCart(product.id));
-    setIsProductInFavorites(isInFavorites(product.id));
+    setIsProductInCart(isInCart(product.id)); // Verifica si está en el carrito
+    setIsProductInFavorites(isInFavorites(product.id)); // Verifica si está en favoritos
   }, [product.id, isInCart, isInFavorites]);
 
   const handleAddToCart = () => {
@@ -66,7 +66,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full mb-10">
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>
       </CardHeader>
