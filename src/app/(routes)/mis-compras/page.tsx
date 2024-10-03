@@ -17,8 +17,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { Navbar } from "@/components/Navbar";
-
 import { useState } from "react";
 import { Trash2, Heart } from "lucide-react";
 
@@ -79,7 +77,6 @@ export default function ShoppingCartPage() {
 
   return (
     <div>
-      <Navbar />
       <main className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">Mi Carro de Compras</h1>
         {cart.length === 0 ? (
@@ -93,11 +90,11 @@ export default function ShoppingCartPage() {
                     <div className="flex flex-col md:flex-row">
                       <div className="md:w-1/4">
                         <Image
-                          src={"https://placehold.co/300x300"}
+                          src={product.image}
                           width={300}
                           height={300}
                           alt={product.name}
-                          className="w-full h-[300px] object-cover"
+                          className="w-full h-auto object-cover p-10"
                         />
                       </div>
                       <div className="md:w-3/4 p-4">
@@ -181,11 +178,14 @@ export default function ShoppingCartPage() {
               <ul className="mb-4">
                 {cart.map((product) => (
                   <li key={product.id} className="flex justify-between mb-2">
-                    <span>{product.name} (x{quantities[product.id] || 1})</span>
                     <span>
-                      ${(
-                        product.price * (quantities[product.id] || 1)
-                      ).toFixed(2)}
+                      {product.name} (x{quantities[product.id] || 1})
+                    </span>
+                    <span>
+                      $
+                      {(product.price * (quantities[product.id] || 1)).toFixed(
+                        2
+                      )}
                     </span>
                   </li>
                 ))}

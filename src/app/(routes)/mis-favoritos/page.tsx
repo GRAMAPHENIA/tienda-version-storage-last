@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/Navbar";
 import { useStore } from "@/store/useStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +36,6 @@ export default function FavoritesPage() {
 
   return (
     <div>
-      <Navbar />
       <main className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">Mis Favoritos</h1>
         {favorites.length === 0 ? (
@@ -47,18 +45,20 @@ export default function FavoritesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map((product) => (
-              <Card key={product.id} className="w-full max-w-sm">
+              <Card key={product.id} className="w-full max-w-lg">
                 <CardHeader>
                   <CardTitle>{product.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Image
-                    src={"https://placehold.co/300x300"}
-                    width={300}
-                    height={300}
-                    alt={product.name}
-                    className="w-full h-48 object-cover mb-4"
-                  />
+                 
+                    <Image
+                      src={product.image}
+                      width={300}
+                      height={300}
+                      alt={product.name}
+                      className="w-full h-[250px] object-contain p-10 bg-zinc-50 mb-5 rounded-md"
+                    />
+                  
                   <p className="text-gray-600">{product.description}</p>
                   <p className="text-lg font-bold mt-2">${product.price}</p>
                 </CardContent>

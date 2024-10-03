@@ -72,11 +72,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </CardHeader>
       <CardContent>
         <Image
-          src={"https://placehold.co/600x400"}
+          src={product.image}
           height={600}
           width={400}
           alt={product.name}
-          className="w-full h-48 object-cover mb-4"
+          className="w-full h-48 object-contain mb-4"
         />
         <p className="text-gray-600">{product.description}</p>
         <p className="text-lg font-bold mt-2">${product.price}</p>

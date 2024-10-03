@@ -2,22 +2,16 @@
 
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // <---- Asegúrate de usarlo
 import { useStore } from "@/store/useStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { PaymentFormValues } from "@/types/payment";
+import { OrderSummary } from "@/components/customs/OrderSummary";
 
-interface PaymentFormValues {
-  name: string;
-  email: string;
-  address: string;
-  postalCode: string;
-  dni: string;
-}
-
-export default function PaymentPage() {
+export const PaymentForm = () => {
   const { cart } = useStore();
   const router = useRouter();
   const { toast } = useToast();
@@ -33,15 +27,7 @@ export default function PaymentPage() {
     return cart.reduce((total, product) => total + product.price, 0);
   };
 
-  const calculateDiscount = () => {
-    return calculateTotal() * 0.1; // 10% de descuento para transferencia bancaria
-  };
-
-  const calculateFinalTotal = () => {
-    return calculateTotal() - calculateDiscount();
-  };
-
-  const onSubmit: SubmitHandler<PaymentFormValues> = async (data) => {
+  const onSubmit: SubmitHandler<PaymentFormValues> = async () => {
     if (cart.length === 0) {
       toast({
         title: "Carrito vacío",
@@ -54,87 +40,15 @@ export default function PaymentPage() {
     setIsSubmitting(true);
 
     try {
-      // Generar el contenido del correo para el cliente
-      const emailContent = `
-        Gracias por tu pedido, ${data.name},
-
-        Hemos recibido correctamente tu pedido #${Math.floor(Math.random() * 100000)} y lo estamos procesando:
-
-        [Pedido #${Math.floor(Math.random() * 100000)}] (${new Date().toLocaleDateString()})
-
-        Producto          Cantidad          Precio
-        ${cart.map((producto) => `
-        ${producto.name}
-        1                $${producto.price.toFixed(2)}
-        `).join('')}
-
-        Subtotal:          $${calculateTotal().toFixed(2)}
-        Envío:             ¡Superaste el monto mínimo! Envío en moto gratuito.
-        Descuento para Transferencia bancaria directa:   -$${calculateDiscount().toFixed(2)}
-        Métodos de pago:   Transferencia bancaria directa
-        Total:             $${calculateFinalTotal().toFixed(2)}
-
-        DNI: ${data.dni}
-
-        Dirección de facturación:
-        ${data.name}
-        DNI: ${data.dni}
-        Dirección: ${data.address}
-        Código postal: ${data.postalCode}
-
-        ¡Gracias por usar nuestra tienda online!
-      `;
-
-      // Enviar el correo al cliente
-      const customerResponse = await fetch("https://formspree.io/f/mrbznwnl", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          correo: data.email, // Correo del cliente
-          mensaje: emailContent, // Contenido del correo
-        }),
+      // Lógica de envío del formulario
+      toast({
+        title: "Pago exitoso",
+        description: "Gracias por tu compra.",
       });
 
-      // Enviar solo los datos de la compra a tu cuenta de Formspree
-      const formspreeResponse = await fetch("https://formspree.io/f/mrbznwnl", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Nombre: data.name,
-          Correo: data.email,
-          Direccion: data.address,
-          codigoPostal: data.postalCode,
-          DNI: data.dni,
-          Carro: cart.map((producto) => ({
-            // id: producto.id,
-            Nombre: producto.name,
-            Cantidad: 1, // Puedes reemplazarlo con la cantidad correspondiente
-            Precio: producto.price,
-          })),
-          Subtotal: calculateTotal().toFixed(2),
-          Descuento: calculateDiscount().toFixed(2),
-          Total: calculateFinalTotal().toFixed(2),
-        }),
-      });
-
-      if (customerResponse.ok && formspreeResponse.ok) {
-        toast({
-          title: "Pago exitoso",
-          description: "Hemos enviado un correo con los detalles de tu compra.",
-        });
-        router.push("/gracias-por-tu-compra");
-      } else {
-        toast({
-          title: "Error",
-          description: "Hubo un problema al procesar tu pago.",
-          variant: "destructive",
-        });
-      }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // Redirigir después del éxito
+      router.push("/gracias-por-tu-compra"); // <---- Redirige al usuario
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         title: "Error",
@@ -252,27 +166,11 @@ export default function PaymentPage() {
               <CardTitle>Resumen de la Compra</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul>
-                {cart.map((product) => (
-                  <li
-                    key={product.id}
-                    className="flex justify-between border-b py-2"
-                  >
-                    <span>{product.name}</span>
-                    <span>${product.price}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex justify-between mt-4 font-bold">
-                <span>Total:</span>
-                <span>
-                  ${calculateTotal().toFixed(2)}
-                </span>
-              </div>
+              <OrderSummary cart={cart} calculateTotal={calculateTotal} />
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
   );
-}
+};

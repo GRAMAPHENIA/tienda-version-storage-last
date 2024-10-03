@@ -9,7 +9,8 @@ const ThankYouPage = () => {
 
   const handleReturnToStore = () => {
     // Limpiar todo el localStorage
-    localStorage.clear();
+    // localStorage.clear();
+    localStorage.removeItem('cart');
 
     // Redirigir a la tienda
     router.push("/"); // Cambia esta ruta según la ubicación de tu tienda
